@@ -12,13 +12,19 @@ func HandleErr(err error) {
 	}
 }
 
-func runAdbCommand(command string) string {
-	cmd := exec.Command("adb", command)
+func runAdbCommand(command ...string) string {
+	commandBytes := runAdbCommandRawOutput(command...)
+
+	return commandBytes.String()
+}
+
+func runAdbCommandRawOutput(command ...string) bytes.Buffer {
+	cmd := exec.Command("adb", command...)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	err := cmd.Run()
 	HandleErr(err)
 
-	return out.String()
+	return out
 }
