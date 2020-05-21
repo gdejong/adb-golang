@@ -1,34 +1,33 @@
 package adb
 
 import (
-	"bytes"
-	"log"
-	"os/exec"
+	"errors"
 	"regexp"
 )
 
 func GetAdbSerialNumber() string {
-	cmd := exec.Command("adb", "devices")
-	var out bytes.Buffer
-	cmd.Stdout = &out
+	adbCommandOutput := runAdbCommand("devices")
 
-	err := cmd.Run()
+	serial, err := findSerialNumber(adbCommandOutput)
 	HandleErr(err)
-	text := out.String()
 
+	return serial
+}
+
+func findSerialNumber(input string) (string, error) {
 	// If no phones are connected, exit.
-	if text == "List of devices attached\n\n" {
-		log.Fatalln("No phone connected, please make sure your phone is connected.")
+	if input == "List of devices attached\n\n" {
+		return "", errors.New("no device connected, please make sure your phone is connected")
 	}
 
 	r, err := regexp.Compile("attached\\s*([a-zA-Z0-9]+)\\s*device")
 	HandleErr(err)
 
-	if !r.MatchString(text) {
-		log.Fatalln("A phone is connected but could not determine its ID, maybe the phone is locked?")
+	if !r.MatchString(input) {
+		return "", errors.New("a phone is connected but could not determine its ID, maybe the phone is locked")
 	}
 
-	m := r.FindStringSubmatch(text)
+	m := r.FindStringSubmatch(input)
 
-	return m[1]
+	return m[1], nil
 }
