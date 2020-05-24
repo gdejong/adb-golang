@@ -30,6 +30,9 @@ var playStickHeroCommand = &cobra.Command{
 		for {
 			img := adb.MakeScreenshot()
 
+			filename := "screenshots/" + time.Now().Format(time.RFC3339) + ".png"
+			adb.StoreImage(img, filename)
+
 			ignore := true
 			isBlack := true
 			transitions := make([]int, 3)
