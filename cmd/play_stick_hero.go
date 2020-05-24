@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/gdejong/adb-golang/pkg/adb"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 func init() {
@@ -13,7 +14,15 @@ var playStickHeroCommand = &cobra.Command{
 	Use:   "adb:play-stick-hero",
 	Short: "Play the Stick Hero game",
 	Run: func(cmd *cobra.Command, args []string) {
+		// Verify the connection to the device.
+		adb.GetAdbSerialNumber()
+
+		on := adb.IsOn()
+		if !on {
+			log.Fatalln("Device screen is off, please unlock the device.")
+		}
+
 		adb.MakeScreenshot("./screenie.png")
-		// TODO finish me, for now it just makes a screenshot
+		adb.Swipe(100)
 	},
 }
