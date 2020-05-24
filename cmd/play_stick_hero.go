@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"github.com/gdejong/adb-golang/pkg/adb"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"image/color"
+	"image/draw"
 	"log"
 	"time"
 )
@@ -35,7 +38,6 @@ var playStickHeroCommand = &cobra.Command{
 			img := adb.MakeScreenshot()
 
 			filename := "screenshots/" + time.Now().Format(time.RFC3339) + ".png"
-			adb.StoreImage(img, filename)
 
 			ignore := true
 			isBlack := true
@@ -43,8 +45,11 @@ var playStickHeroCommand = &cobra.Command{
 			transitionCount := 0
 
 			for x := 0; x < img.Bounds().Max.X; x++ {
-				color := img.At(x, screenYPosition)
-				r, g, b, _ := color.RGBA()
+				pixelColor := img.At(x, screenYPosition)
+				r, g, b, _ := pixelColor.RGBA()
+
+				// Draw a red vertical line to see at what height we are looking.
+				img.(draw.Image).Set(x, screenYPosition, color.RGBA{R: 255, G: 1, B: 1, A: 255})
 
 				// Ignore pixels until we encounter the first black area.
 				if ignore && (r+g+b != 0) {
@@ -72,6 +77,8 @@ var playStickHeroCommand = &cobra.Command{
 				}
 			}
 
+			adb.StoreImage(img, filename)
+
 			start := transitions[0]
 			target1 := transitions[1]
 			target2 := transitions[2]
@@ -80,6 +87,8 @@ var playStickHeroCommand = &cobra.Command{
 			target := target2 - target1
 
 			distance := int(float64(gap+target/2) * .98)
+
+			logrus.WithFields(logrus.Fields{"start": start, "target1": target1, "target2": target2, "gap": gap, "target": target, "distance": distance}).Debugln("Calculations")
 
 			adb.Swipe(distance)
 
