@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/gdejong/adb-golang/pkg/adb"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -17,6 +19,9 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		versionText := adb.GetVersion()
 
-		fmt.Println(versionText)
+		scanner := bufio.NewScanner(strings.NewReader(versionText))
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
 	},
 }
