@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+// ScreenYPosition is the height at which a vertical line can be drawn to go through all black areas
+// our Stick Hero will walk on.
+const screenYPosition = 1800
+
 func init() {
 	rootCmd.AddCommand(playStickHeroCommand)
 }
@@ -39,7 +43,7 @@ var playStickHeroCommand = &cobra.Command{
 			transitionCount := 0
 
 			for x := 0; x < img.Bounds().Max.X; x++ {
-				color := img.At(x, 1800)
+				color := img.At(x, screenYPosition)
 				r, g, b, _ := color.RGBA()
 
 				// Ignore pixels until we encounter the first black area.
