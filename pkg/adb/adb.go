@@ -2,13 +2,14 @@ package adb
 
 import (
 	"bytes"
-	"log"
+	"github.com/sirupsen/logrus"
 	"os/exec"
+	"time"
 )
 
 func HandleErr(err error) {
 	if err != nil {
-		log.Fatal(err)
+		logrus.WithError(err).Panic("An error occurred!")
 	}
 }
 
@@ -23,7 +24,10 @@ func runAdbCommandRawOutput(command ...string) bytes.Buffer {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
+	start := time.Now()
 	err := cmd.Run()
+	elapsed := time.Since(start)
+	logrus.WithFields(logrus.Fields{"duration": elapsed, "adb command": command}).Debug("Ran ADB command")
 	HandleErr(err)
 
 	return out

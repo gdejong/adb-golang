@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/gdejong/adb-golang/pkg/adb"
+	"github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -21,7 +21,7 @@ var versionCmd = &cobra.Command{
 
 		scanner := bufio.NewScanner(strings.NewReader(versionText))
 		for scanner.Scan() {
-			fmt.Println(scanner.Text())
+			logrus.Info(scanner.Text())
 		}
 	},
 }
