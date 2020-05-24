@@ -7,18 +7,18 @@ import (
 	"os"
 )
 
-func MakeScreenshot(filename string) {
+func MakeScreenshot() image.Image {
 	b := runAdbCommandRawOutput("exec-out", "screencap", "-p")
 
-	storePng(b.Bytes(), filename)
-}
-
-func storePng(b []byte, filename string) {
-	out, err := os.Create(filename)
+	r := bytes.NewReader(b.Bytes())
+	img, _, err := image.Decode(r)
 	HandleErr(err)
 
-	r := bytes.NewReader(b)
-	img, _, err := image.Decode(r)
+	return img
+}
+
+func StoreImage(img image.Image, filename string) {
+	out, err := os.Create(filename)
 	HandleErr(err)
 
 	err = png.Encode(out, img)

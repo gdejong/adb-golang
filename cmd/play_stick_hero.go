@@ -23,7 +23,9 @@ var playStickHeroCommand = &cobra.Command{
 			log.Fatalln("Device screen is off, please unlock the device.")
 		}
 
-		adb.MakeScreenshot("./screenie.png")
+		img := adb.MakeScreenshot()
+
+		adb.StoreImage(img, "test.png")
 		adb.Swipe(100)
 	},
 }
