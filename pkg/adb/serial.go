@@ -5,26 +5,23 @@ import (
 	"regexp"
 )
 
-func GetAdbSerialNumber() string {
+func GetAdbSerialNumber() (string, error) {
 	adbCommandOutput := runAdbCommand("devices")
 
-	serial, err := findSerialNumber(adbCommandOutput)
-	HandleErr(err)
-
-	return serial
+	return findSerialNumber(adbCommandOutput)
 }
 
 func findSerialNumber(input string) (string, error) {
-	// If no phones are connected, exit.
+	// If no devices are connected, exit.
 	if input == "List of devices attached\n\n" {
-		return "", errors.New("no device connected, please make sure your phone is connected")
+		return "", errors.New("no device connected, please make sure your device is connected")
 	}
 
 	r, err := regexp.Compile("attached\\s*([a-zA-Z0-9]+)\\s*device")
 	HandleErr(err)
 
 	if !r.MatchString(input) {
-		return "", errors.New("a phone is connected but could not determine its ID, maybe the phone is locked")
+		return "", errors.New("a device is connected but could not determine its ID, maybe the device is locked")
 	}
 
 	m := r.FindStringSubmatch(input)

@@ -15,7 +15,8 @@ var testConnectionCommand = &cobra.Command{
 	Short: "Test if a device is connected",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Println("Looking for connected device...")
-		serialNumber := adb.GetAdbSerialNumber()
+		serialNumber, err := adb.GetAdbSerialNumber()
+		adb.HandleErr(err)
 
 		log.Println("Detected ADB serial number: " + serialNumber)
 	},

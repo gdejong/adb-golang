@@ -15,7 +15,8 @@ var playStickHeroCommand = &cobra.Command{
 	Short: "Play the Stick Hero game",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Verify the connection to the device.
-		adb.GetAdbSerialNumber()
+		_, err := adb.GetAdbSerialNumber()
+		adb.HandleErr(err)
 
 		on := adb.IsOn()
 		if !on {
