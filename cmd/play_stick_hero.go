@@ -12,7 +12,7 @@ import (
 
 // ScreenYPosition is the height at which a vertical line can be drawn to go through all black areas
 // our Stick Hero will walk on.
-const screenYPosition = 1800
+const screenYPosition = 1600
 
 func init() {
 	rootCmd.AddCommand(playStickHeroCommand)
@@ -37,6 +37,11 @@ var playStickHeroCommand = &cobra.Command{
 		screenSize := adb.GetScreenResolution()
 		logrus.WithField("size", screenSize).Debugln("Screen size")
 
+		colorRed := color.RGBA{R: 255, G: 1, B: 1, A: 255}
+		colorGreen := color.RGBA{R: 0, G: 255, B: 1, A: 255}
+		colorBlue := color.RGBA{R: 0, G: 0, B: 255, A: 255}
+		colorYellow := color.RGBA{R: 255, G: 255, B: 0, A: 255}
+
 		for {
 			img := adb.MakeScreenshot()
 
@@ -52,7 +57,7 @@ var playStickHeroCommand = &cobra.Command{
 				r, g, b, _ := pixelColor.RGBA()
 
 				// Draw a red vertical line to see at what height we are looking.
-				img.(draw.Image).Set(x, screenYPosition, color.RGBA{R: 255, G: 1, B: 1, A: 255})
+				img.(draw.Image).Set(x, screenYPosition, colorRed)
 
 				// Ignore pixels until we encounter the first black area.
 				if ignore && (r+g+b != 0) {
@@ -80,16 +85,30 @@ var playStickHeroCommand = &cobra.Command{
 				}
 			}
 
-			adb.StoreImage(img, filename)
-
 			currentPlatformEnd := transitions[0]
 			nextPlatformStart := transitions[1]
 			nextPlatformEnd := transitions[2]
 
 			gap := nextPlatformStart - currentPlatformEnd
 			nextPlatformWidth := nextPlatformEnd - nextPlatformStart
+			distance := int(float64(gap + nextPlatformWidth/2))
 
-			distance := int(float64(gap+nextPlatformWidth/2) * .98)
+			// Draw the gap
+			for i := currentPlatformEnd; i < nextPlatformStart; i++ {
+				img.(draw.Image).Set(i, screenYPosition+2, colorGreen)
+			}
+
+			// Draw the second platform
+			for i := nextPlatformStart; i < nextPlatformEnd; i++ {
+				img.(draw.Image).Set(i, screenYPosition+4, colorBlue)
+			}
+
+			// Draw the distance
+			for i := currentPlatformEnd; i < currentPlatformEnd+distance; i++ {
+				img.(draw.Image).Set(i, screenYPosition+6, colorYellow)
+			}
+
+			adb.StoreImage(img, filename)
 
 			logrus.WithFields(logrus.Fields{
 				"currentPlatformEnd": currentPlatformEnd,
@@ -105,7 +124,9 @@ var playStickHeroCommand = &cobra.Command{
 				logrus.Fatalln("distance is zero, this can't be right")
 			}
 
-			adb.Swipe(distance)
+			msToSwipe := int(float64(distance) * 0.99)
+
+			adb.Swipe(msToSwipe)
 
 			time.Sleep(time.Millisecond * 3000)
 		}
