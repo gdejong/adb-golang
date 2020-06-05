@@ -2,8 +2,19 @@ package adb
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
+	"strconv"
 )
+
+type ScreenResolution struct {
+	Width  int
+	Height int
+}
+
+func (s ScreenResolution) String() string {
+	return fmt.Sprintf("width: %d, height: %d", s.Width, s.Height)
+}
 
 func IsOn() bool {
 	// https://stackoverflow.com/questions/35275828/is-there-a-way-to-check-if-android-device-screen-is-locked-via-adb/60037241#60037241
@@ -29,4 +40,31 @@ func isOn(input string) bool {
 	}
 
 	return true
+}
+
+func GetScreenResolution() ScreenResolution {
+	adbText := runAdbCommand("shell", "dumpsys", "display")
+
+	return getScreenResolution(adbText)
+}
+
+func getScreenResolution(input string) ScreenResolution {
+	r, err := regexp.Compile("mStableDisplaySize=Point\\((\\d+),\\s+(\\d+)\\)")
+	HandleErr(err)
+
+	if !r.MatchString(input) {
+		HandleErr(errors.New("regex failed"))
+	}
+
+	m := r.FindStringSubmatch(input)
+
+	w, err := strconv.Atoi(m[1])
+	HandleErr(err)
+	h, err := strconv.Atoi(m[2])
+	HandleErr(err)
+
+	return ScreenResolution{
+		Width:  w,
+		Height: h,
+	}
 }

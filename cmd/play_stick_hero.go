@@ -34,6 +34,9 @@ var playStickHeroCommand = &cobra.Command{
 			log.Fatalln("Device screen is off, please unlock the device.")
 		}
 
+		screenSize := adb.GetScreenResolution()
+		logrus.WithField("size", screenSize).Debugln("Screen size")
+
 		for {
 			img := adb.MakeScreenshot()
 
