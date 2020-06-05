@@ -82,20 +82,32 @@ var playStickHeroCommand = &cobra.Command{
 
 			adb.StoreImage(img, filename)
 
-			start := transitions[0]
-			target1 := transitions[1]
-			target2 := transitions[2]
+			currentPlatformEnd := transitions[0]
+			nextPlatformStart := transitions[1]
+			nextPlatformEnd := transitions[2]
 
-			gap := target1 - start
-			target := target2 - target1
+			gap := nextPlatformStart - currentPlatformEnd
+			nextPlatformWidth := nextPlatformEnd - nextPlatformStart
 
-			distance := int(float64(gap+target/2) * .98)
+			distance := int(float64(gap+nextPlatformWidth/2) * .98)
 
-			logrus.WithFields(logrus.Fields{"start": start, "target1": target1, "target2": target2, "gap": gap, "target": target, "distance": distance}).Debugln("Calculations")
+			logrus.WithFields(logrus.Fields{
+				"currentPlatformEnd": currentPlatformEnd,
+				"nextPlatformStart":  nextPlatformStart,
+				"nextPlatformEnd":    nextPlatformEnd,
+				"gap":                gap,
+				"nextPlatformWidth":  nextPlatformWidth,
+				"distance":           distance,
+				"filename":           filename,
+			}).Debugln("Calculations")
+
+			if distance == 0 {
+				logrus.Fatalln("distance is zero, this can't be right")
+			}
 
 			adb.Swipe(distance)
 
-			time.Sleep(time.Millisecond * 2500)
+			time.Sleep(time.Millisecond * 3000)
 		}
 	},
 }
